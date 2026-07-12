@@ -1,5 +1,5 @@
-import { GameModel, PIECES, START_SECONDS, formatTime } from "./game.js?v=20260712-1";
-import { StockfishEngine, describeEngineError } from "./stockfish.js?v=20260712-1";
+import { GameModel, PIECES, START_SECONDS, formatTime } from "./game.js?v=20260712-2";
+import { StockfishEngine, describeEngineError } from "./stockfish.js?v=20260712-2";
 
 const $ = (selector) => document.querySelector(selector);
 const boardElement = $("#board");

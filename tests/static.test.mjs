@@ -12,8 +12,8 @@ test("app, loader, worker, dan WASM memakai cache version yang konsisten", async
   const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
   const app = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
   const loader = await readFile(new URL("../js/stockfish.js", import.meta.url), "utf8");
-  assert.match(html, /app\.js\?v=20260712-1/);
-  assert.match(app, /stockfish\.js\?v=20260712-1/);
+  assert.match(html, /app\.js\?v=20260712-2/);
+  assert.match(app, /stockfish\.js\?v=20260712-2/);
   assert.match(loader, /worker\.searchParams\.set\("v", ENGINE_VERSION\)/);
   assert.match(loader, /wasm\.searchParams\.set\("v", ENGINE_VERSION\)/);
 });

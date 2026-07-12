@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "18.0.7-20260712-1";
+export const ENGINE_VERSION = "18.0.7-20260712-2";
 
 const ENGINE_JS = new URL("../assets/engine/stockfish-18-lite-single.js", import.meta.url);
 const ENGINE_WASM = new URL("../assets/engine/stockfish-18-lite-single.wasm", import.meta.url);
@@ -23,9 +23,9 @@ export function engineAssetUrls(retry = false) {
   return {
     worker,
     wasm,
-    // Stockfish 18 reads the encoded WASM URL from hash[0] and requires
-    // hash[1] === "worker". Query parameters must stay before this fragment.
-    entry: `${worker.href}#${encodeURIComponent(wasm.href)},worker`,
+    // Stockfish 18 reads the encoded WASM URL from hash[0]. Do not append
+    // ",worker": that mode skips primary UCI worker initialization.
+    entry: `${worker.href}#${encodeURIComponent(wasm.href)}`,
   };
 }
 
