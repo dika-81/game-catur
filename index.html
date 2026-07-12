@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101916">
+  <meta name="description" content="Permainan catur melawan Stockfish yang berjalan sepenuhnya di browser.">
+  <title>Chess AI · PGSD UPI Serang</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">PGSD UPI SERANG</p>
+        <h1>Chess <span>AI</span></h1>
+      </div>
+      <p class="credit">Karya Andika Arisetyawan</p>
+    </header>
+
+    <section class="game-layout" aria-label="Permainan catur melawan komputer">
+      <div class="board-column">
+        <div class="player-strip ai-strip">
+          <div class="avatar" aria-hidden="true">AI</div>
+          <div>
+            <strong>Bot Kaprodi PGSD</strong>
+            <span id="engine-state">Menyiapkan Stockfish…</span>
+          </div>
+          <time id="black-timer" aria-label="Waktu AI">10:00</time>
+        </div>
+
+        <div id="board" class="chessboard" role="grid" aria-label="Papan catur" aria-busy="true"></div>
+
+        <div class="player-strip">
+          <div class="avatar player-avatar" aria-hidden="true">P</div>
+          <div>
+            <strong id="player-name">Pemain</strong>
+            <span>Bidak putih</span>
+          </div>
+          <time id="white-timer" aria-label="Waktu pemain">10:00</time>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <section class="status-card" aria-live="polite">
+          <p class="label">STATUS PERMAINAN</p>
+          <h2 id="status">Memuat engine…</h2>
+          <p id="status-detail">Stockfish WebAssembly sedang disiapkan.</p>
+        </section>
+
+        <section class="evaluation-card" aria-label="Evaluasi Stockfish">
+          <div>
+            <p class="label">EVALUASI</p>
+            <strong id="evaluation">0.00</strong>
+          </div>
+          <div class="eval-track" aria-hidden="true">
+            <span id="eval-fill"></span>
+          </div>
+          <p>Nilai positif menguntungkan pemain putih.</p>
+        </section>
+
+        <section class="control-card">
+          <label for="difficulty">Level Stockfish</label>
+          <select id="difficulty">
+            <option value="2">Mudah · depth 2</option>
+            <option value="4">Sedang · depth 4</option>
+            <option value="6" selected>Sulit · depth 6</option>
+            <option value="9">Grandmaster · depth 9</option>
+          </select>
+          <p id="level-help">Level dapat diubah kapan saja.</p>
+        </section>
+
+        <ol id="move-list" class="move-list" aria-label="Riwayat langkah">
+          <li class="empty-history">Belum ada langkah.</li>
+        </ol>
+
+        <button id="restart" class="restart-button" type="button">
+          <span aria-hidden="true">↻</span> Mulai ulang
+        </button>
+      </aside>
+    </section>
+  </main>
+
+  <dialog id="name-dialog" class="modal">
+    <form id="name-form" method="dialog">
+      <p class="eyebrow">SELAMAT DATANG</p>
+      <h2>Siapa nama pemainnya?</h2>
+      <p>Anda bermain sebagai putih melawan Stockfish.</p>
+      <label for="name-input">Nama pemain</label>
+      <input id="name-input" name="playerName" maxlength="28" autocomplete="name" placeholder="Pemain" autofocus>
+      <button type="submit">Mulai bermain</button>
+    </form>
+  </dialog>
+
+  <dialog id="promotion-dialog" class="modal promotion-modal">
+    <form method="dialog">
+      <h2>Pilih promosi pion</h2>
+      <div class="promotion-options">
+        <button type="submit" value="q" aria-label="Promosi menjadi menteri">♕</button>
+        <button type="submit" value="r" aria-label="Promosi menjadi benteng">♖</button>
+        <button type="submit" value="b" aria-label="Promosi menjadi gajah">♗</button>
+        <button type="submit" value="n" aria-label="Promosi menjadi kuda">♘</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="result-dialog" class="modal result-modal">
+    <form method="dialog">
+      <p class="eyebrow">PERMAINAN SELESAI</p>
+      <h2 id="result-title">Hasil permainan</h2>
+      <p id="result-detail"></p>
+      <button id="play-again" type="submit">Main lagi</button>
+    </form>
+  </dialog>
+
+  <noscript>Aplikasi ini memerlukan JavaScript untuk menjalankan permainan dan Stockfish.</noscript>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

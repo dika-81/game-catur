@@ -1,0 +1,10 @@
+{
+  "name": "chess-ai-pgsd-upi-serang",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Aplikasi catur statis dengan Stockfish WebAssembly untuk GitHub Pages.",
+  "scripts": {
+    "test": "node --test --test-isolation=none"
+  }
+}
