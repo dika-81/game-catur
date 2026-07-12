@@ -49,14 +49,15 @@ button, select { cursor: pointer; }
   width: 100%;
   max-width: 760px;
   aspect-ratio: 1;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
   overflow: hidden;
   border: 6px solid #293a33;
   border-radius: 5px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
 }
 
-.square { position: relative; display: grid; min-width: 0; padding: 0; place-items: center; border: 0; border-radius: 0; color: #172019; background: var(--light-square); line-height: 1; }
+.square { position: relative; display: grid; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; padding: 0; place-items: center; border: 0; border-radius: 0; appearance: none; color: #172019; background: var(--light-square); line-height: 1; }
 .square.dark { background: var(--dark-square); }
 .square:hover { filter: brightness(1.04); }
 .square.selected::after { position: absolute; inset: 5%; border: 4px solid rgba(230, 184, 92, .95); border-radius: 5px; content: ""; pointer-events: none; }
@@ -64,7 +65,7 @@ button, select { cursor: pointer; }
 .square.in-check { box-shadow: inset 0 0 28px 8px rgba(211, 66, 66, .85); }
 .square.legal-target::before { position: absolute; z-index: 2; width: 22%; aspect-ratio: 1; border-radius: 50%; background: rgba(15, 36, 27, .52); content: ""; pointer-events: none; }
 .square.capture-target::before { width: 76%; border: clamp(5px, .7vw, 9px) solid rgba(15, 36, 27, .52); background: transparent; }
-.piece { z-index: 1; font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", serif; font-size: clamp(2rem, 7vw, 5rem); transform: translateY(-2%); filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .28)); }
+.piece { z-index: 1; display: block; max-width: 88%; max-height: 88%; font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "DejaVu Sans", serif; font-size: clamp(2rem, 7vw, 5rem); line-height: 1; transform: translateY(-2%); filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .28)); }
 .piece.white-piece { color: #fffdf5; text-shadow: 0 0 1px #172019, 0 1px 2px #172019; }
 .coordinate { position: absolute; z-index: 3; color: rgba(21, 35, 28, .72); font-size: clamp(.5rem, 1.1vw, .72rem); font-weight: 800; pointer-events: none; }
 .coordinate.rank { top: 4px; left: 5px; }
