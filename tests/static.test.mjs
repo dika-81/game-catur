@@ -4,8 +4,18 @@ import { readFile, stat } from "node:fs/promises";
 
 test("entry point hanya memakai path relatif GitHub Pages", async () => {
   const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-  assert.match(html, /\.\/js\/app\.js/);
+  assert.match(html, /\.\/js\/app\.js\?v=[^"']+/);
   assert.doesNotMatch(html, /url_for|fetch\(["']\//);
+});
+
+test("app, loader, worker, dan WASM memakai cache version yang konsisten", async () => {
+  const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+  const app = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
+  const loader = await readFile(new URL("../js/stockfish.js", import.meta.url), "utf8");
+  assert.match(html, /app\.js\?v=20260712-1/);
+  assert.match(app, /stockfish\.js\?v=20260712-1/);
+  assert.match(loader, /worker\.searchParams\.set\("v", ENGINE_VERSION\)/);
+  assert.match(loader, /wasm\.searchParams\.set\("v", ENGINE_VERSION\)/);
 });
 
 test("aset Stockfish WebAssembly tersedia dan valid", async () => {

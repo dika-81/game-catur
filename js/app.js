@@ -1,5 +1,5 @@
-import { GameModel, PIECES, START_SECONDS, formatTime } from "./game.js";
-import { StockfishEngine } from "./stockfish.js";
+import { GameModel, PIECES, START_SECONDS, formatTime } from "./game.js?v=20260712-1";
+import { StockfishEngine, describeEngineError } from "./stockfish.js?v=20260712-1";
 
 const $ = (selector) => document.querySelector(selector);
 const boardElement = $("#board");
@@ -13,7 +13,15 @@ const storageKey = "chess-ai-pgsd-state-v1";
 
 const saved = readSavedState();
 const game = new GameModel(saved.pgn);
-const engine = new StockfishEngine();
+const engine = new StockfishEngine(({ stage, message, error }) => {
+  if (stage === "retry") {
+    engineState.textContent = "Mencoba ulang Stockfish…";
+    setStatus("Mencoba ulang engine…", describeEngineError(error));
+  } else if (stage !== "complete" && stage !== "uciok" && stage !== "readyok") {
+    engineState.textContent = "Memuat Stockfish 18…";
+    setStatus("Memuat engine…", message);
+  }
+});
 let playerName = saved.playerName || "";
 let whiteTime = Number.isFinite(saved.whiteTime) ? saved.whiteTime : START_SECONDS;
 let blackTime = Number.isFinite(saved.blackTime) ? saved.blackTime : START_SECONDS;
@@ -184,7 +192,7 @@ async function makeAiMove() {
     if (!finishIfNeeded()) setStatus("Giliran Anda", game.isCheck() ? "Raja putih sedang diskak." : "Pilih bidak putih untuk melangkah.");
   } catch (error) {
     console.error(error);
-    setStatus("Engine bermasalah", "Muat ulang halaman untuk mencoba menyiapkan Stockfish kembali.");
+    setStatus("Engine bermasalah", describeEngineError(error));
   } finally {
     thinking = false;
     document.body.classList.remove("thinking");
@@ -332,7 +340,7 @@ async function boot() {
   } catch (error) {
     console.error(error);
     engineState.textContent = "Stockfish gagal dimuat";
-    setStatus("Engine gagal dimuat", "Jalankan situs melalui HTTP/HTTPS, bukan dengan membuka file secara langsung.");
+    setStatus("Engine gagal dimuat", describeEngineError(error));
   }
 }
 
