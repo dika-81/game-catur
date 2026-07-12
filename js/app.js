@@ -25,6 +25,7 @@ let engineReady = false;
 let lastTick = performance.now();
 let evaluationBusy = false;
 let gameVersion = 0;
+let gameStarted = Boolean(playerName);
 
 function readSavedState() {
   try { return JSON.parse(sessionStorage.getItem(storageKey)) || {}; }
@@ -118,7 +119,7 @@ function renderHistory(history) {
 }
 
 async function handleSquare(square) {
-  if (!engineReady || thinking || gameEnded || game.turn() !== "w") return;
+  if (!gameStarted || !engineReady || thinking || gameEnded || game.turn() !== "w") return;
   const piece = game.piece(square);
   if (!selected) {
     if (piece?.color === "w") selectSquare(square);
@@ -155,6 +156,7 @@ function selectSquare(square) {
 }
 
 function choosePromotion() {
+  promotionDialog.returnValue = "";
   promotionDialog.showModal();
   return new Promise((resolve) => {
     promotionDialog.addEventListener("close", () => resolve(promotionDialog.returnValue || null), { once: true });
@@ -234,7 +236,7 @@ function updateEvaluation(score, sideToMove) {
 }
 
 async function refreshEvaluation() {
-  if (!engineReady || thinking || evaluationBusy || gameEnded) return;
+  if (!gameStarted || !engineReady || thinking || evaluationBusy || gameEnded) return;
   const version = gameVersion;
   evaluationBusy = true;
   try {
@@ -249,7 +251,7 @@ async function refreshEvaluation() {
 function tick(now) {
   const delta = (now - lastTick) / 1000;
   lastTick = now;
-  if (engineReady && !gameEnded && !thinking && game.turn() === "w") {
+  if (gameStarted && engineReady && !gameEnded && !thinking && game.turn() === "w") {
     whiteTime = Math.max(0, whiteTime - delta);
     if (whiteTime <= 0) endByClock("AI");
   }
@@ -297,8 +299,13 @@ $("#restart").addEventListener("click", restartGame);
 $("#play-again").addEventListener("click", restartGame);
 $("#name-form").addEventListener("submit", () => {
   playerName = $("#name-input").value.trim() || "Pemain";
+  gameStarted = true;
   $("#player-name").textContent = playerName;
   saveState();
+  if (engineReady && !gameEnded) {
+    setStatus("Giliran Anda", "Pilih bidak putih untuk melihat langkah legal.");
+    refreshEvaluation();
+  }
 });
 nameDialog.addEventListener("cancel", (event) => event.preventDefault());
 $("#difficulty").addEventListener("change", saveState);
@@ -318,9 +325,10 @@ async function boot() {
     engineReady = true;
     engineState.textContent = "Stockfish 18 · WebAssembly";
     if (gameEnded) endGame(game.outcome());
-    else setStatus(game.turn() === "w" ? "Giliran Anda" : "Melanjutkan permainan…", "Pilih bidak putih untuk melihat langkah legal.");
-    if (game.turn() === "b" && !gameEnded) await makeAiMove();
-    else refreshEvaluation();
+    else if (gameStarted) setStatus(game.turn() === "w" ? "Giliran Anda" : "Melanjutkan permainan…", "Pilih bidak putih untuk melihat langkah legal.");
+    else setStatus("Siap bermain", "Masukkan nama pemain untuk memulai timer.");
+    if (gameStarted && game.turn() === "b" && !gameEnded) await makeAiMove();
+    else if (gameStarted) refreshEvaluation();
   } catch (error) {
     console.error(error);
     engineState.textContent = "Stockfish gagal dimuat";
