@@ -12,10 +12,25 @@ test("app, loader, worker, dan WASM memakai cache version yang konsisten", async
   const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
   const app = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
   const loader = await readFile(new URL("../js/stockfish.js", import.meta.url), "utf8");
-  assert.match(html, /app\.js\?v=20260712-2/);
-  assert.match(app, /stockfish\.js\?v=20260712-2/);
+  assert.match(html, /styles\.css\?v=20260718-1/);
+  assert.match(html, /app\.js\?v=20260718-1/);
+  assert.match(app, /game\.js\?v=20260718-1/);
+  assert.match(app, /stockfish\.js\?v=20260718-1/);
   assert.match(loader, /worker\.searchParams\.set\("v", ENGINE_VERSION\)/);
   assert.match(loader, /wasm\.searchParams\.set\("v", ENGINE_VERSION\)/);
+});
+
+test("entry point menyediakan kontrol mode dan kartu analisis", async () => {
+  const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+  const app = await readFile(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(html, /name="game-mode" value="bot"/);
+  assert.match(html, /name="game-mode" value="analysis"/);
+  assert.match(html, /id="analysis-card"/);
+  assert.match(html, /id="reanalyze"/);
+  assert.match(html, /id="undo"/);
+  assert.match(app, /const ANALYSIS_DEPTH = 12/);
+  assert.match(app, /setInterval\(saveState, 5000\)/);
+  assert.doesNotMatch(app, /setInterval\([^)]*refreshEvaluation/);
 });
 
 test("aset Stockfish WebAssembly tersedia dan valid", async () => {

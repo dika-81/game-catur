@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { Worker } from "node:worker_threads";
-import { engineAssetUrls } from "../js/stockfish.js";
+import { StockfishEngine, engineAssetUrls } from "../js/stockfish.js";
 
 test("URL worker mempertahankan subpath dan tidak memakai mode worker internal", () => {
   const { worker, wasm, entry } = engineAssetUrls();
@@ -17,6 +17,31 @@ test("URL worker mempertahankan subpath dan tidak memakai mode worker internal",
   assert.equal(worker.searchParams.get("v"), wasm.searchParams.get("v"));
   assert.ok(entry.indexOf("?v=") < entry.indexOf("#"));
   assert.doesNotMatch(entry, /,worker$/);
+});
+
+test("StockfishEngine mengembalikan depth dan PV terbaru bersama bestmove", async () => {
+  const engine = new StockfishEngine();
+  const result = new Promise((resolve, reject) => {
+    engine.activeSearch = {
+      resolve,
+      reject,
+      score: null,
+      reachedDepth: 0,
+      pvDepth: null,
+      pv: [],
+    };
+  });
+
+  engine.onMessage("info depth 11 score cp 18 pv d2d4 d7d5 c2c4");
+  engine.onMessage("info depth 12 score cp 24 pv e2e4 e7e5 g1f3 b8c6");
+  engine.onMessage("bestmove e2e4");
+
+  assert.deepEqual(await result, {
+    bestMove: "e2e4",
+    score: { type: "cp", value: 24 },
+    depth: 12,
+    pv: ["e2e4", "e7e5", "g1f3", "b8c6"],
+  });
 });
 
 test("Stockfish berjalan di Worker dan membalas protokol UCI", { timeout: 45000 }, async () => {

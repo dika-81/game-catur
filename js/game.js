@@ -2,6 +2,11 @@ import { Chess } from "../assets/vendor/chess.js";
 
 export const START_SECONDS = 10 * 60;
 
+export const GAME_MODES = Object.freeze({
+  BOT: "bot",
+  ANALYSIS: "analysis",
+});
+
 export const PIECES = Object.freeze({
   wp: "♙", wn: "♘", wb: "♗", wr: "♖", wq: "♕", wk: "♔",
   bp: "♟", bn: "♞", bb: "♝", br: "♜", bq: "♛", bk: "♚",
@@ -17,6 +22,22 @@ export function formatTime(totalSeconds) {
 export function uciToMove(uci) {
   if (!/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(uci || "")) return null;
   return { from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || undefined };
+}
+
+export function normalizeGameMode(mode) {
+  return mode === GAME_MODES.ANALYSIS ? GAME_MODES.ANALYSIS : GAME_MODES.BOT;
+}
+
+export function canUserMove(mode, turn) {
+  return normalizeGameMode(mode) === GAME_MODES.ANALYSIS || turn === "w";
+}
+
+export function shouldBotMove(mode, turn) {
+  return normalizeGameMode(mode) === GAME_MODES.BOT && turn === "b";
+}
+
+export function modeUsesClock(mode) {
+  return normalizeGameMode(mode) === GAME_MODES.BOT;
 }
 
 export function outcomeFor(game) {
@@ -64,5 +85,27 @@ export class GameModel {
   moveUci(uci) {
     const move = uciToMove(uci);
     return move ? this.move(move.from, move.to, move.promotion) : null;
+  }
+
+  uciLineToSan(uciMoves, maxPly = Infinity) {
+    const copy = new Chess(this.fen());
+    const sanMoves = [];
+    const limit = Math.max(0, Number(maxPly) || 0);
+    for (const uci of Array.isArray(uciMoves) ? uciMoves.slice(0, limit) : []) {
+      const move = uciToMove(uci);
+      if (!move) break;
+      try {
+        const played = copy.move(move);
+        if (!played) break;
+        sanMoves.push(played.san);
+      } catch {
+        break;
+      }
+    }
+    return sanMoves;
+  }
+
+  undo() {
+    return this.chess.undo();
   }
 }

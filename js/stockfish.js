@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "18.0.7-20260712-2";
+export const ENGINE_VERSION = "18.0.7-20260718-1";
 
 const ENGINE_JS = new URL("../assets/engine/stockfish-18-lite-single.js", import.meta.url);
 const ENGINE_WASM = new URL("../assets/engine/stockfish-18-lite-single.wasm", import.meta.url);
@@ -9,6 +9,17 @@ export function scoreFromLine(line) {
   const match = line.match(/\bscore (cp|mate) (-?\d+)/);
   if (!match) return null;
   return { type: match[1], value: Number(match[2]) };
+}
+
+export function infoFromLine(line) {
+  if (!line.startsWith("info ")) return null;
+  const depthMatch = line.match(/\bdepth (\d+)/);
+  const pvMatch = line.match(/\bpv((?: [a-h][1-8][a-h][1-8][qrbn]?)+)(?:\s|$)/);
+  return {
+    depth: depthMatch ? Number(depthMatch[1]) : null,
+    score: scoreFromLine(line),
+    pv: pvMatch ? pvMatch[1].trim().split(/\s+/) : [],
+  };
 }
 
 export function engineAssetUrls(retry = false) {
@@ -173,8 +184,13 @@ export class StockfishEngine {
 
     if (!this.activeSearch) return;
     if (line.startsWith("info ")) {
-      const score = scoreFromLine(line);
-      if (score) this.activeSearch.score = score;
+      const info = infoFromLine(line);
+      if (info?.depth !== null) this.activeSearch.reachedDepth = Math.max(this.activeSearch.reachedDepth, info.depth);
+      if (info?.score) this.activeSearch.score = info.score;
+      if (info?.pv.length) {
+        this.activeSearch.pv = info.pv;
+        this.activeSearch.pvDepth = info.depth;
+      }
       return;
     }
 
@@ -182,7 +198,12 @@ export class StockfishEngine {
       const bestMove = line.split(/\s+/)[1];
       const search = this.activeSearch;
       this.activeSearch = null;
-      search.resolve({ bestMove: bestMove === "(none)" ? null : bestMove, score: search.score });
+      search.resolve({
+        bestMove: bestMove === "(none)" ? null : bestMove,
+        score: search.score,
+        depth: search.pvDepth ?? search.reachedDepth,
+        pv: search.pv,
+      });
       queueMicrotask(() => this.runNextSearch());
     }
   }
@@ -211,7 +232,16 @@ export class StockfishEngine {
   search(fen, depth) {
     if (!this.ready) return Promise.reject(new Error("Stockfish belum siap."));
     return new Promise((resolve, reject) => {
-      this.searchQueue.push({ fen, depth: Math.max(1, Number(depth) || 1), resolve, reject, score: null });
+      this.searchQueue.push({
+        fen,
+        depth: Math.max(1, Number(depth) || 1),
+        resolve,
+        reject,
+        score: null,
+        reachedDepth: 0,
+        pvDepth: null,
+        pv: [],
+      });
       this.runNextSearch();
     });
   }

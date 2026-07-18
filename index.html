@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#101916">
   <meta name="description" content="Permainan catur melawan Stockfish yang berjalan sepenuhnya di browser.">
   <title>Chess AI · PGSD UPI Serang</title>
-  <link rel="stylesheet" href="./styles.css?v=20260712-2">
+  <link rel="stylesheet" href="./styles.css?v=20260718-1">
 </head>
 <body>
   <main class="app-shell">
@@ -18,12 +18,12 @@
       <p class="credit">Karya Andika Arisetyawan</p>
     </header>
 
-    <section class="game-layout" aria-label="Permainan catur melawan komputer">
+    <section class="game-layout" aria-label="Permainan dan analisis catur">
       <div class="board-column">
         <div class="player-strip ai-strip">
-          <div class="avatar" aria-hidden="true">AI</div>
+          <div id="black-avatar" class="avatar" aria-hidden="true">AI</div>
           <div>
-            <strong>Bot Kaprodi PGSD</strong>
+            <strong id="black-name">Bot Kaprodi PGSD</strong>
             <span id="engine-state">Menyiapkan Stockfish…</span>
           </div>
           <time id="black-timer" aria-label="Waktu AI">10:00</time>
@@ -35,13 +35,27 @@
           <div class="avatar player-avatar" aria-hidden="true">P</div>
           <div>
             <strong id="player-name">Pemain</strong>
-            <span>Bidak putih</span>
+            <span id="white-label">Bidak putih</span>
           </div>
           <time id="white-timer" aria-label="Waktu pemain">10:00</time>
         </div>
       </div>
 
       <aside class="sidebar">
+        <section class="mode-card">
+          <p class="label">MODE PERMAINAN</p>
+          <div class="mode-options" role="radiogroup" aria-label="Pilih mode catur">
+            <label>
+              <input type="radio" name="game-mode" value="bot" checked>
+              <span><strong>Lawan Bot</strong><small>Putih melawan Stockfish</small></span>
+            </label>
+            <label>
+              <input type="radio" name="game-mode" value="analysis">
+              <span><strong>Analisis Catur</strong><small>Mainkan kedua warna</small></span>
+            </label>
+          </div>
+        </section>
+
         <section class="status-card" aria-live="polite">
           <p class="label">STATUS PERMAINAN</p>
           <h2 id="status">Memuat engine…</h2>
@@ -60,14 +74,37 @@
         </section>
 
         <section class="control-card">
-          <label for="difficulty">Level Stockfish</label>
-          <select id="difficulty">
-            <option value="2">Mudah · depth 2</option>
-            <option value="4">Sedang · depth 4</option>
-            <option value="6" selected>Sulit · depth 6</option>
-            <option value="9">Grandmaster · depth 9</option>
-          </select>
-          <p id="level-help">Level dapat diubah kapan saja.</p>
+          <div id="difficulty-field">
+            <label for="difficulty">Level Stockfish</label>
+            <select id="difficulty">
+              <option value="2">Mudah · depth 2</option>
+              <option value="4">Sedang · depth 4</option>
+              <option value="6" selected>Sulit · depth 6</option>
+              <option value="9">Grandmaster · depth 9</option>
+            </select>
+            <p id="level-help">Level dapat diubah kapan saja.</p>
+          </div>
+        </section>
+
+        <section id="analysis-card" class="analysis-card" aria-live="polite" hidden>
+          <div class="analysis-heading">
+            <p class="label">ANALISIS DEPTH 12</p>
+            <span id="analysis-depth">Menunggu</span>
+          </div>
+          <dl>
+            <div>
+              <dt>Langkah terbaik</dt>
+              <dd id="best-move">—</dd>
+            </div>
+            <div>
+              <dt>Principal variation</dt>
+              <dd id="principal-variation">—</dd>
+            </div>
+          </dl>
+          <div class="analysis-actions">
+            <button id="reanalyze" type="button">Analisis Ulang</button>
+            <button id="undo" type="button">Urungkan Langkah</button>
+          </div>
         </section>
 
         <ol id="move-list" class="move-list" aria-label="Riwayat langkah">
@@ -85,7 +122,7 @@
     <form id="name-form" method="dialog">
       <p class="eyebrow">SELAMAT DATANG</p>
       <h2>Siapa nama pemainnya?</h2>
-      <p>Anda bermain sebagai putih melawan Stockfish.</p>
+      <p id="name-description">Anda bermain sebagai putih melawan Stockfish.</p>
       <label for="name-input">Nama pemain</label>
       <input id="name-input" name="playerName" maxlength="28" autocomplete="name" placeholder="Pemain" autofocus>
       <button type="submit">Mulai bermain</button>
@@ -114,6 +151,6 @@
   </dialog>
 
   <noscript>Aplikasi ini memerlukan JavaScript untuk menjalankan permainan dan Stockfish.</noscript>
-  <script type="module" src="./js/app.js?v=20260712-2"></script>
+  <script type="module" src="./js/app.js?v=20260718-1"></script>
 </body>
 </html>
